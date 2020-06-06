@@ -22,15 +22,23 @@ interface Point {
   longitude: number,
 }
 
-const Points = () => {
-  const navigation = useNavigation()
+interface Params {
+  uf: string,
+  city: string,
+}
 
+const Points = () => {
   const [items, setItems] = useState<Item[]>([])
   const [points, setPoints] = useState<Point[]>([])
 
   const [initialPosition, setInitialPosition] = useState<[number, number]>([0, 0])
 
   const [selectedItems, setSelectedItems] = useState<number[]>([])
+
+  const navigation = useNavigation()
+  const route = useRoute()
+
+  const routeParams = route.params as Params
 
   useEffect(() => {
     async function loadPosition() {
@@ -44,6 +52,7 @@ const Points = () => {
       setInitialPosition([latitude, longitude])
     }
     loadPosition()
+  console.log(routeParams)
   }, [])
 
   useEffect(() => {
@@ -56,18 +65,17 @@ const Points = () => {
 
   useEffect(() => {
     api.get('points', {
-      // params: {
-      //   city: 'city',
-      //   uf: 'uf',
-      //   items: selectedItems,
-      // }
+      params: {
+        city: routeParams.city,
+        uf: routeParams.uf,
+        items: selectedItems,
+      }
     }).then(response => {
-      console.log(response.data.data)
       setPoints(response.data.data)
     }).catch(() => {
       Alert.alert('Ops...', 'Não foi possivel carregar os pontos de coleta. Por favor, tente novamente.')
     })
-  }, [])
+  }, [selectedItems])
 
   const handleNavigateBack = () => {
     navigation.goBack()
